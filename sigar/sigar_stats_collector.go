@@ -1,12 +1,15 @@
 package sigar
 
 import (
+	"strings"
 	"sync"
 	"time"
 
 	sigar "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/gosigar"
 
 	bosherr "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/errors"
+	boshlog "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/logger"
+	boshsys "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/system"
 	boshstats "github.com/cloudfoundry/bosh-agent/platform/stats"
 )
 
@@ -14,11 +17,13 @@ type sigarStatsCollector struct {
 	statsSigar         sigar.Sigar
 	latestCPUStats     boshstats.CPUStats
 	latestCPUStatsLock sync.RWMutex
+	logger             boshlog.Logger
 }
 
-func NewSigarStatsCollector(sigar sigar.Sigar) boshstats.Collector {
+func NewSigarStatsCollector(sigar sigar.Sigar, logger boshlog.Logger) boshstats.Collector {
 	return &sigarStatsCollector{
 		statsSigar: sigar,
+		logger:     logger,
 	}
 }
 
@@ -103,4 +108,27 @@ func (s *sigarStatsCollector) GetDiskStats(mountedPath string) (stats boshstats.
 	stats.InodeUsage.Used = fsUsage.Files - fsUsage.FreeFiles
 
 	return
+}
+
+func (s *sigarStatsCollector) GetProcessStats() (stats []boshstats.ProcessStat, err error) {
+	stats = []boshstats.ProcessStat{}
+
+	cmdRunner := boshsys.NewExecCmdRunner(s.logger)
+	stdout, _, _, err := cmdRunner.RunCommand("bash", "-c", `monit summary | grep Process | awk '{ print $2, $3 }' | tr -d "\'"`)
+	if err != nil {
+		err = bosherr.WrapError(err, "Getting Processes State")
+		return
+	}
+
+	for _, process := range strings.Split(strings.TrimSpace(stdout), "\n") {
+		fields := strings.Fields(process)
+		stat := boshstats.ProcessStat{
+			Name:  fields[0],
+			State: fields[1],
+		}
+		stats = append(stats, stat)
+
+	}
+
+	return stats, nil
 }

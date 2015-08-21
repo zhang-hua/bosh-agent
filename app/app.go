@@ -77,7 +77,7 @@ func (app *app) Setup(args []string) error {
 
 	// Pulled outside of the platform provider so bosh-init will not pull in
 	// sigar when cross compiling linux -> darwin
-	sigarCollector := boshsigar.NewSigarStatsCollector(&sigar.ConcreteSigar{})
+	sigarCollector := boshsigar.NewSigarStatsCollector(&sigar.ConcreteSigar{}, app.logger)
 
 	platformProvider := boshplatform.NewProvider(app.logger, app.dirProvider, sigarCollector, app.fs, config.Platform)
 	app.platform, err = platformProvider.Get(opts.PlatformName)

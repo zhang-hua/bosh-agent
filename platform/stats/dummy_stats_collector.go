@@ -37,3 +37,17 @@ func (p dummyStatsCollector) GetDiskStats(devicePath string) (stats DiskStats, e
 	stats.InodeUsage.Total = 1
 	return
 }
+
+func (p dummyStatsCollector) GetProcessStats() (stats []ProcessStat, err error) {
+	stats = []ProcessStat{
+		ProcessStat{
+			Name:  "cloud_controller",
+			State: "running",
+		},
+		ProcessStat{
+			Name:  "cloud_controller_worker",
+			State: "running",
+		},
+	}
+	return
+}

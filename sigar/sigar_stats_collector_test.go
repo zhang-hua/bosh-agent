@@ -135,4 +135,14 @@ var _ = Describe("sigarStatsCollector", func() {
 			Expect(stats.InodeUsage.Used).To(Equal(uint64(400)))
 		})
 	})
+
+	Describe("GetProcessStats", func() {
+		It("returns process stats when success", func(){
+			
+		})
+
+		It("raises error when failing to get process stats", func(){
+
+		})
+	})
 })

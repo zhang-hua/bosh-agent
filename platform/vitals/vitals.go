@@ -1,11 +1,12 @@
 package vitals
 
 type Vitals struct {
-	CPU  CPUVitals    `json:"cpu"`
-	Disk DiskVitals   `json:"disk,omitempty"`
-	Load []string     `json:"load,omitempty"`
-	Mem  MemoryVitals `json:"mem"`
-	Swap MemoryVitals `json:"swap"`
+	CPU     CPUVitals      `json:"cpu"`
+	Disk    DiskVitals     `json:"disk,omitempty"`
+	Load    []string       `json:"load,omitempty"`
+	Mem     MemoryVitals   `json:"mem"`
+	Swap    MemoryVitals   `json:"swap"`
+	Process []ProcessVital `json:"process",omitempty`
 }
 
 type CPUVitals struct {
@@ -24,4 +25,9 @@ type SpecificDiskVitals struct {
 type MemoryVitals struct {
 	Kb      string `json:"kb,omitempty"`
 	Percent string `json:"percent,omitempty"`
+}
+
+type ProcessVital struct {
+	Name  string `json:"name"`
+	State string `json:"state"`
 }

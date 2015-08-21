@@ -26,11 +26,12 @@ func NewService(statsCollector boshstats.Collector, dirProvider boshdirs.Provide
 
 func (s concreteService) Get() (vitals Vitals, err error) {
 	var (
-		loadStats boshstats.CPULoad
-		cpuStats  boshstats.CPUStats
-		memStats  boshstats.Usage
-		swapStats boshstats.Usage
-		diskStats DiskVitals
+		loadStats     boshstats.CPULoad
+		cpuStats      boshstats.CPUStats
+		memStats      boshstats.Usage
+		swapStats     boshstats.Usage
+		diskStats     DiskVitals
+		processVitals []ProcessVital
 	)
 
 	loadStats, err = s.statsCollector.GetCPULoad()
@@ -63,6 +64,20 @@ func (s concreteService) Get() (vitals Vitals, err error) {
 		return
 	}
 
+	statsData, err := s.statsCollector.GetProcessStats()
+	if err != nil {
+		err = bosherr.WrapError(err, "Getting Process Stats")
+		return
+	}
+
+	processVitals = []ProcessVital{}
+	for _, data := range statsData {
+		processVitals = append(processVitals, ProcessVital{
+			Name:  data.Name,
+			State: data.State,
+		})
+	}
+
 	vitals = Vitals{
 		Load: []string{
 			fmt.Sprintf("%.2f", loadStats.One),
@@ -74,9 +89,10 @@ func (s concreteService) Get() (vitals Vitals, err error) {
 			Sys:  cpuStats.SysPercent().FormatFractionOf100(1),
 			Wait: cpuStats.WaitPercent().FormatFractionOf100(1),
 		},
-		Mem:  createMemVitals(memStats),
-		Swap: createMemVitals(swapStats),
-		Disk: diskStats,
+		Mem:     createMemVitals(memStats),
+		Swap:    createMemVitals(swapStats),
+		Disk:    diskStats,
+		Process: processVitals,
 	}
 	return
 }

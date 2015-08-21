@@ -26,6 +26,11 @@ type DiskStats struct {
 	InodeUsage Usage
 }
 
+type ProcessStat struct {
+	Name  string
+	State string
+}
+
 type Collector interface {
 	StartCollecting(time.Duration, chan struct{})
 
@@ -35,6 +40,7 @@ type Collector interface {
 	GetMemStats() (usage Usage, err error)
 	GetSwapStats() (usage Usage, err error)
 	GetDiskStats(mountedPath string) (stats DiskStats, err error)
+	GetProcessStats() (stats []ProcessStat, err error)
 }
 
 func (cpuStats CPUStats) UserPercent() Percentage {
