@@ -78,6 +78,7 @@ func (s concreteService) Get() (vitals Vitals, err error) {
 		Swap: createMemVitals(swapStats),
 		Disk: diskStats,
 	}
+
 	return
 }
 

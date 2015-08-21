@@ -351,7 +351,7 @@ func init() {
 				compressor := boshcmd.NewTarballCompressor(runner, fs)
 				copier := boshcmd.NewCpCopier(runner, fs, logger)
 
-				sigarCollector := boshsigar.NewSigarStatsCollector(&sigar.ConcreteSigar{})
+				sigarCollector := boshsigar.NewSigarStatsCollector(&sigar.ConcreteSigar{}, runner)
 
 				vitalsService := boshvitals.NewService(sigarCollector, dirProvider)
 

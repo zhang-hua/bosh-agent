@@ -97,12 +97,22 @@ var _ = Describe("GetState", func() {
 
 					jobSupervisor.StatusStatus = "running"
 
+					jobSupervisor.ServiceStatusStatus = map[string]string{
+						"fake-service": "running",
+					}
+
 					specService.Spec = boshas.V1ApplySpec{
 						Deployment: "fake-deployment",
 					}
 
 					expectedVitals := boshvitals.Vitals{
 						Load: []string{"foo", "bar", "baz"},
+						Process: []boshvitals.ProcessVital{
+							boshvitals.ProcessVital{
+								Name:  "fake-service",
+								State: "running",
+							},
+						},
 					}
 					vitalsService.GetVitals = expectedVitals
 					expectedVM := map[string]interface{}{"name": "vm-abc-def"}

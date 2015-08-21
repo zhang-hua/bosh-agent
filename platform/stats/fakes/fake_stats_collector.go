@@ -18,6 +18,9 @@ type FakeCollector struct {
 
 	SwapStats boshstats.Usage
 	DiskStats map[string]boshstats.DiskStats
+
+	ProcessStats    []boshstats.ProcessStat
+	ProcessStatsErr error
 }
 
 func (c *FakeCollector) StartCollecting(collectionInterval time.Duration, latestGotUpdated chan struct{}) {
@@ -49,4 +52,8 @@ func (c *FakeCollector) GetDiskStats(devicePath string) (stats boshstats.DiskSta
 		err = errors.New("Disk not found")
 	}
 	return
+}
+
+func (c *FakeCollector) GetProcessStats() (stats []boshstats.ProcessStat, err error) {
+	return c.ProcessStats, c.ProcessStatsErr
 }

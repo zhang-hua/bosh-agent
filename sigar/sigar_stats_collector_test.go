@@ -14,8 +14,8 @@ import (
 
 var _ = Describe("sigarStatsCollector", func() {
 	var (
-		collector Collector
 		fakeSigar *fakesigar.FakeSigar
+		collector Collector
 	)
 
 	BeforeEach(func() {

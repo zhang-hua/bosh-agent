@@ -21,10 +21,37 @@ type servicesTag struct {
 }
 
 type serviceTag struct {
-	XMLName xml.Name `xml:"service"`
-	Name    string   `xml:"name,attr"`
-	Status  int      `xml:"status"`
-	Monitor int      `xml:"monitor"`
+	XMLName  xml.Name  `xml:"service"`
+	Name     string    `xml:"name,attr"`
+	CollectedSeconds uint64 `xml:"collected_sec"`
+	Status   int       `xml:"status"`
+	Monitor  int       `xml:"monitor"`
+	Pid      int       `xml:"pid"`
+	Ppid     int       `xml:"ppid"`
+	Uptime   int       `xml:"uptime"`
+	Children int       `xml:"children"`
+	Memory   memoryTag `xml:"memory"`
+	CPU      cpuTag    `xml:"cpu"`
+	Port     portTag    `xml:"port"`
+}
+
+type memoryTag struct {
+	XMLName       xml.Name `xml:"memory"`
+	KiloByte      uint64      `xml:"kilobyte"`
+	KiloByteTotal uint64      `xml:"kilobytetotal"`
+	Percent       float64      `xml:"percent"`
+	PercentTotal  float64      `xml:"percenttotal"`
+}
+
+type cpuTag struct {
+	XMLName      xml.Name `xml:"cpu"`
+	Percent      float64      `xml:"percent"`
+	PercentTotal float64      `xml:"percenttotal"`
+}
+
+type portTag struct {
+	XMLName       xml.Name `xml:"port"`
+	ResponseTime float64   `xml:"responsetime"`
 }
 
 type serviceGroupsTag struct {
@@ -89,6 +116,40 @@ func (status status) ServicesInGroup(name string) (services []Service) {
 			}
 
 			services = append(services, service)
+		}
+	}
+
+	return
+}
+
+func (status status) ServiceStatsInGroup(name string) (serviceStats map[string]interface{}) {
+	serviceStats = make(map[string]interface{})
+
+	serviceGroupTag, found := status.ServiceGroups.Get(name)
+	if !found {
+		return
+	}
+
+	for _, serviceTag := range status.Services.Services {
+		if serviceGroupTag.Contains(serviceTag.Name) {
+			stat :=  map[string]interface{}{
+				"CollectedSeconds": strconv.FormatUint(serviceTag.CollectedSeconds, 10),
+				"Name": serviceTag.Name,
+				"State": serviceTag.StatusString,
+				"Monitor": strconv.Itoa(serviceTag.Monitor),
+				"Pid": strconv.Itoa(serviceTag.Pid),
+				"Ppid": strconv.Itoa(serviceTag.Ppid),
+				"Uptime": strconv.Itoa(serviceTag.Uptime),
+				"Children": strconv.Itoa(serviceTag.Children),
+				"MemoryKiloByte": strconv.FormatUint(serviceTag.Memory.KiloByte, 10),
+				"MemoryKiloByteTotal": strconv.FormatUint(serviceTag.Memory.KiloByteTotal, 10),
+				"MemoryPercent": strconv.FormatFloat(serviceTag.Memory.Percent, 'f', -1, 64),
+				"MemoryPercentTotal": strconv.FormatFloat(serviceTag.Memory.PercentTotal, 'f', -1, 64),
+				"CPUPercent": strconv.FormatFloat(serviceTag.CPU.Percent, 'f', -1, 64),
+				"CPUPercentTotal": strconv.FormatFloat(serviceTag.CPU.PercentTotal, 'f', -1, 64),
+				"PortResponseTime": strconv.FormatFloat(serviceTag.Port.ResponseTime, 'f', -1, 64),
+			}
+			serviceStats[serviceTag.Name] = stat
 		}
 	}
 

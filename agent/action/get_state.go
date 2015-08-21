@@ -68,6 +68,7 @@ func (a GetStateAction) Run(filters ...string) (GetStateV1ApplySpec, error) {
 			return GetStateV1ApplySpec{}, bosherr.WrapError(err, "Building full vitals")
 		}
 		vitalsReference = &vitals
+		a.appendProcessVitals(vitalsReference, a.jobSupervisor.ServiceStatus())
 	}
 
 	settings := a.settingsService.GetSettings()
@@ -101,4 +102,16 @@ func (a GetStateAction) Resume() (interface{}, error) {
 
 func (a GetStateAction) Cancel() error {
 	return errors.New("not supported")
+}
+
+func (a GetStateAction) appendProcessVitals(vitals *boshvitals.Vitals, stats map[string]interface{}) {
+	vitals.Process = []boshvitals.ProcessVital{}
+	for name, stat := range stats {
+		statMap :=  stat.(map[string]interface{})
+		pv := boshvitals.ProcessVital{
+			Name:  name,
+			State: statMap,
+		}
+		vitals.Process = append(vitals.Process, pv)
+	}
 }

@@ -12,12 +12,16 @@ type dummyNatsJobSupervisor struct {
 	mbusHandler       boshhandler.Handler
 	status            string
 	jobFailureHandler JobFailureHandler
+	serviceStatus     map[string]interface{}
 }
 
 func NewDummyNatsJobSupervisor(mbusHandler boshhandler.Handler) JobSupervisor {
 	return &dummyNatsJobSupervisor{
 		mbusHandler: mbusHandler,
 		status:      "running",
+		serviceStatus: map[string]interface{}{
+			"dummy-nats-service": "running",
+		},
 	}
 }
 
@@ -36,6 +40,7 @@ func (d *dummyNatsJobSupervisor) Start() error {
 	if d.status != "failing" {
 		d.status = "running"
 	}
+	d.serviceStatus = make(map[string]interface{})
 	return nil
 }
 
@@ -56,6 +61,10 @@ func (d *dummyNatsJobSupervisor) RemoveAllJobs() error {
 
 func (d *dummyNatsJobSupervisor) Status() string {
 	return d.status
+}
+
+func (d *dummyNatsJobSupervisor) ServiceStatus() (status map[string]interface{}) {
+	return d.serviceStatus
 }
 
 func (d *dummyNatsJobSupervisor) MonitorJobFailures(handler JobFailureHandler) error {

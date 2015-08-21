@@ -1,6 +1,7 @@
 package vitals_test
 
 import (
+	"errors"
 	"time"
 
 	. "github.com/cloudfoundry/bosh-agent/internal/github.com/onsi/ginkgo"
@@ -49,6 +50,16 @@ func buildVitalsService() (statsCollector *fakestats.FakeCollector, service Serv
 				InodeUsage: boshstats.Usage{Used: 3, Total: 4},
 			},
 		},
+		ProcessStats: []boshstats.ProcessStat{
+			boshstats.ProcessStat{
+				Name:  "fake-process-1",
+				State: "running",
+			},
+			boshstats.ProcessStat{
+				Name:  "fake-process-2",
+				State: "initializing",
+			},
+		},
 	}
 
 	service = NewService(statsCollector, dirProvider)
@@ -90,6 +101,16 @@ func init() {
 					"kb":      "600",
 					"percent": "60",
 				},
+				"processes": []interface{}{
+					map[string]string{
+						"name":  "fake-process-1",
+						"state": "running",
+					},
+					map[string]string{
+						"name":  "fake-process-2",
+						"state": "initializing",
+					},
+				},
 			}
 
 			Expect(err).ToNot(HaveOccurred())
@@ -113,10 +134,19 @@ func init() {
 			boshassert.LacksJSONKey(GinkgoT(), vitals.Disk, "ephemeral")
 			boshassert.LacksJSONKey(GinkgoT(), vitals.Disk, "persistent")
 		})
+
 		It("get getting vitals on system disk error", func() {
 
 			statsCollector, service := buildVitalsService()
 			statsCollector.DiskStats = map[string]boshstats.DiskStats{}
+
+			_, err := service.Get()
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("raise error when failing to get process stats", func() {
+			statsCollector, service := buildVitalsService()
+			statsCollector.ProcessStatsErr = errors.New("error on getting processes state")
 
 			_, err := service.Get()
 			Expect(err).To(HaveOccurred())
