@@ -114,6 +114,11 @@ type ProcState struct {
 	Processor int
 }
 
+type ProcessState struct {
+	Name	string
+	State	string
+}
+
 type ProcMem struct {
 	Size        uint64
 	Resident    uint64

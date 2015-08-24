@@ -22,6 +22,8 @@ type FakeSigar struct {
 
 	CollectCpuStatsCpuCh  chan sigar.Cpu
 	CollectCpuStatsStopCh chan struct{}
+	
+	ProcessStats	sigar.ProcState
 }
 
 func NewFakeSigar() *FakeSigar {

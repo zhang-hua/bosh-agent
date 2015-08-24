@@ -1,8 +1,8 @@
 package vitals_test
 
 import (
-	"time"
 	"errors"
+	"time"
 
 	. "github.com/cloudfoundry/bosh-agent/internal/github.com/onsi/ginkgo"
 	. "github.com/cloudfoundry/bosh-agent/internal/github.com/onsi/gomega"
@@ -52,11 +52,11 @@ func buildVitalsService() (statsCollector *fakestats.FakeCollector, service Serv
 		},
 		ProcessStats: []boshstats.ProcessStat{
 			boshstats.ProcessStat{
-				Name: "fake-process-1",
+				Name:  "fake-process-1",
 				State: "running",
 			},
 			boshstats.ProcessStat{
-				Name: "fake-process-2",
+				Name:  "fake-process-2",
 				State: "initializing",
 			},
 		},
@@ -103,11 +103,11 @@ func init() {
 				},
 				"process": []interface{}{
 					map[string]string{
-						"name": "fake-process-1",
+						"name":  "fake-process-1",
 						"state": "running",
 					},
 					map[string]string{
-						"name": "fake-process-2",
+						"name":  "fake-process-2",
 						"state": "initializing",
 					},
 				},

@@ -10,17 +10,19 @@ import (
 	fakesigar "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/gosigar/fakes"
 	. "github.com/cloudfoundry/bosh-agent/platform/stats"
 	boshsigar "github.com/cloudfoundry/bosh-agent/sigar"
+	boshlog "github.com/cloudfoundry/bosh-agent/internal/github.com/cloudfoundry/bosh-utils/logger"
 )
 
 var _ = Describe("sigarStatsCollector", func() {
 	var (
 		collector Collector
 		fakeSigar *fakesigar.FakeSigar
+		log boshlog.Logger
 	)
 
 	BeforeEach(func() {
 		fakeSigar = fakesigar.NewFakeSigar()
-		collector = boshsigar.NewSigarStatsCollector(fakeSigar)
+		collector = boshsigar.NewSigarStatsCollector(fakeSigar, log)
 	})
 
 	Describe("GetCPULoad", func() {
@@ -137,12 +139,21 @@ var _ = Describe("sigarStatsCollector", func() {
 	})
 
 	Describe("GetProcessStats", func() {
-		It("returns process stats when success", func(){
-			
-		})
+		It("returns process stats when success", func() {
+			fakeSigar.ProcessStats = sigar.ProcessState{
+				Name:  "fake-process-name",
+				State: "running",
+			}
 
-		It("raises error when failing to get process stats", func(){
-
+			stats, err := collector.GetProcessStats()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(stats[0].Name).To(Equal("fake-process-name"))
+			Expect(stats[0].State).ToNot(Equal("running"))
 		})
+		/*
+			It("raises error when failing to get process stats", func() {
+
+			})
+		*/
 	})
 })
